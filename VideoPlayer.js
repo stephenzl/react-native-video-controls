@@ -1,19 +1,19 @@
+import padStart from 'lodash/padStart';
 import React, {Component} from 'react';
-import Video from 'react-native-video';
 import {
-  TouchableWithoutFeedback,
-  TouchableHighlight,
-  ImageBackground,
-  PanResponder,
-  StyleSheet,
   Animated,
-  SafeAreaView,
   Easing,
   Image,
-  View,
+  ImageBackground,
+  PanResponder,
+  SafeAreaView,
+  StyleSheet,
   Text,
+  TouchableHighlight,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
-import padStart from 'lodash/padStart';
+import Video from 'react-native-video';
 
 export default class VideoPlayer extends Component {
   static defaultProps = {
@@ -85,7 +85,7 @@ export default class VideoPlayer extends Component {
     this.events = {
       onError: this.props.onError || this._onError.bind(this),
       onBack: this.props.onBack || this._onBack.bind(this),
-      onEnd: this.props.onEnd || this._onEnd.bind(this),
+      onEnd: this._onEnd.bind(this),
       onScreenTouch: this._onScreenTouch.bind(this),
       onEnterFullscreen: this.props.onEnterFullscreen,
       onExitFullscreen: this.props.onExitFullscreen,
@@ -259,7 +259,14 @@ export default class VideoPlayer extends Component {
    * Either close the video or go to a
    * new page.
    */
-  _onEnd() {}
+  _onEnd() {
+    const state = this.state;
+    state.paused = true;
+    state.currentTime = state.duration;
+    this.setState(state);
+    this.setSeekerPosition(this.player.seekerWidth);
+    this.props.onEnd && this.props.onEnd();
+  }
 
   /**
    * Set the error state to true which then
@@ -498,6 +505,9 @@ export default class VideoPlayer extends Component {
     if (state.paused) {
       typeof this.events.onPause === 'function' && this.events.onPause();
     } else {
+      if (String(state.currentTime) == String(state.duration)) {
+        this.seekTo(0);
+      }
       typeof this.events.onPlay === 'function' && this.events.onPlay();
     }
 
@@ -1063,7 +1073,7 @@ export default class VideoPlayer extends Component {
         {...this.player.seekPanResponder.panHandlers}>
         <View
           style={styles.seekbar.track}
-          onLayout={event =>
+          onLayout={(event) =>
             (this.player.seekerWidth = event.nativeEvent.layout.width)
           }
           pointerEvents={'none'}>
@@ -1193,7 +1203,7 @@ export default class VideoPlayer extends Component {
         <View style={[styles.player.container, this.styles.containerStyle]}>
           <Video
             {...this.props}
-            ref={videoPlayer => (this.player.ref = videoPlayer)}
+            ref={(videoPlayer) => (this.player.ref = videoPlayer)}
             resizeMode={this.state.resizeMode}
             volume={this.state.volume}
             paused={this.state.paused}
