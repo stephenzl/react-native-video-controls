@@ -1331,6 +1331,7 @@ const styles = {
       width: null,
       margin: 12,
       marginBottom: 18,
+      paddingTop: 10,
     },
     bottomControlGroup: {
       alignSelf: 'stretch',
